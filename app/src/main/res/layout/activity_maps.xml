@@ -1,0 +1,31 @@
+<RelativeLayout
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+<Button
+    android:id="@+id/Search"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:onClick="onClick"
+    android:background="@drawable/round_button"
+    android:text="Search"
+    android:layout_marginBottom="20dp"
+    android:layout_marginEnd="63dp"
+    android:layout_marginStart="78dp"
+    android:layout_marginTop="600dp"
+    android:textColor="#fff"
+    android:textStyle="bold"/>
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="false"
+        android:layout_alignParentStart="true"
+        tools:context="com.example.sahan.guideme.MapsActivity" />
+</RelativeLayout>
