@@ -1,6 +1,8 @@
 package com.example.sahan.guideme;
 
 import android.Manifest;
+import android.app.PendingIntent;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -20,6 +22,7 @@ import com.example.sahan.guideme.interfaces.GuideMeApi;
 import com.example.sahan.guideme.models.Model;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -52,7 +55,9 @@ LocationListener{
     int PROXIMITY_RADIUS = 10000;
     double latitude,longitude;
     private GuideMeApi mAPIService;
-
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    static MapsActivity instance;
+    public static MapsActivity getInstance(){return instance;}
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,10 +104,32 @@ LocationListener{
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             bulidGoogleApiClient();
+            updateLocation();
             mMap.setMyLocationEnabled(true);
         }
     }
 
+    private void updateLocation() {
+        buildLocationRequest();
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        if (ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)!=
+                PackageManager.PERMISSION_GRANTED ){
+            return;
+        }
+        fusedLocationProviderClient.requestLocationUpdates(locationRequest, getPendingIntent());
+    }
+    private PendingIntent getPendingIntent() {
+        Intent intent = new Intent(this,MyLocationService.class);
+        intent.setAction(MyLocationService.ACTION_PROCESS_UPDATE);
+        return PendingIntent.getBroadcast(this,0,intent,PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+    private void buildLocationRequest() {
+        locationRequest = new LocationRequest();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        locationRequest.setInterval(5000);
+        locationRequest.setFastestInterval(3000);
+        locationRequest.setSmallestDisplacement(10f);
+    }
 
     protected synchronized void bulidGoogleApiClient() {
         client = new GoogleApiClient.Builder(this).addConnectionCallbacks(this).addOnConnectionFailedListener(this).addApi(LocationServices.API).build();
@@ -140,7 +167,7 @@ LocationListener{
         }
     }
 
-    private void sendLocation(String s, String hotelFindersDID, double latitude, double longitude) {
+    public void sendLocation(String s, String hotelFindersDID, double latitude, double longitude) {
         Model model = new Model();
         model.setId(s);
         model.setDid(hotelFindersDID);
@@ -164,8 +191,8 @@ LocationListener{
     }
 
     public void showResponse(String response) {
-       String rspn = response.toString();
-        Toast.makeText(this, rspn, Toast.LENGTH_SHORT).show();
+
+
     }
 
     public void onClick(View v)
